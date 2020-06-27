@@ -7,6 +7,7 @@
 // @license     MIT; https://opensource.org/licenses/MIT
 // @version     0.2
 // @icon        https://www.mycloud.com/favicon.ico
+// @updateURL   https://raw.githubusercontent.com/mshavliuk/uerscripts/master/wdhome_view_button.js
 // @grant       none
 // @run-at      document-end
 // @include     /^https?://home.mycloud.com/.*$/
