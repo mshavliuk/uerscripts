@@ -21,13 +21,13 @@
           <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
             <header class="modal__header">
               <h2 class="modal__title" id="modal-1-title">
-                Micromodal
+                Restricted time detected
               </h2>
               <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
             </header>
             <main class="modal__content" id="modal-1-content">
               <p>
-                Try hitting the <code>tab</code> key and notice how the focus stays within the modal itself. Also, <code>esc</code> to close modal.
+                You seem to visit this site in restricted time
               </p>
             </main>
             <footer class="modal__footer">
@@ -38,9 +38,65 @@
         </div>
       </div>
     `;
+    const appPrefix = '[Youtube Blockator]';
+
+    class ClockWatch {
+        constructor() {
+            console.log('ClockWatch constructor');
+            const initialState = this.loadState();
+            if(initialState === null) {
+                this.initialSpentTime = 0;
+            } else {
+                this.initialSpentTime = initialState.spentTime;
+            }
+            this.createAt = Date.now();
+        }
+
+        pause() {
+            // TODO
+        }
+
+        resume() {
+            // TODO
+        }
+
+        stop() {
+            this.spentTime = this.getSpentTime();
+            this.saveState();
+            console.log('ClockWatch.stop ::: spent time ', this.spentTime);
+        }
+
+        getSpentTime() {
+            return this.initialSpentTime + (Date.now() - this.createAt) / 1000;
+        }
+
+        saveState() {
+            const dataToStore = {
+                spentTime: this.spentTime,
+            };
+
+            unsafeWindow.localStorage.setItem(`${appPrefix} State`, JSON.stringify(dataToStore))
+        }
+
+        loadState() {
+            const data = unsafeWindow.localStorage.getItem(`${appPrefix} State`);
+            if(data === null) {
+                return null;
+            }
+
+            return JSON.parse(data);
+        }
+    }
+
 
     const main = async () => { // or check document.readyState === 'complete'
         console.log('run main')
+
+        const clock = new ClockWatch();
+
+        unsafeWindow.addEventListener('beforeunload', () => {
+            clock.stop();
+        });
 
         const loadScript = (url) => new Promise((resolve, reject) => {
             var s = document.createElement('script');
