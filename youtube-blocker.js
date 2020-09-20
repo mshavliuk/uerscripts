@@ -117,22 +117,42 @@
             document.head.appendChild(link);
         });
 
+        const todayDateString = new Date().toISOString().slice(0,10);
 
-        await loadStyle('https://micromodal.now.sh/styles.f3827981.css');
-        await loadScript('https://unpkg.com/micromodal/dist/micromodal.min.js');
+        const scheduleBlockStart = '10:00'
+        const scheduleBlockStop = '18:00'
 
-        const modalWrapper = document.createElement('div')
-        modalWrapper.innerHTML = templateHTML;
-        unsafeWindow.document.body.appendChild(modalWrapper)
-        MicroModal.init();
-        setTimeout(() => MicroModal.show('modal-1'), 10000)
+        const blockTimeStart = Date.parse(`${todayDateString}T${scheduleBlockStart}`);
+        const blockTimeStop = Date.parse(`${todayDateString}T${scheduleBlockStop}`);
+        const now = new Date();
+
+        const timeSinceStartOfBlock = Date.now() - blockTimeStart;
+        const timeUntilEndOfBlock = blockTimeStop - Date.now();
+
+        const timeString = `1970-01-01T${now.toLocaleTimeString()}Z`;
+        const timeShift = Date.parse(timeString);
+
+        const destroyThePage = () => {
+            console.log(unsafeWindow.document.body);
+            console.log(unsafeWindow.document.head);
+            unsafeWindow.document.body.innerHTML = '';
+
+            unsafeWindow.XMLHttpRequest.prototype.send = () => false;
+        }
+
+        if(timeSinceStartOfBlock > 0 && timeUntilEndOfBlock > 0) {
+            const stylePromise =  loadStyle('https://micromodal.now.sh/styles.f3827981.css');
+            const scriptPromise = loadScript('https://unpkg.com/micromodal/dist/micromodal.min.js');
+
+            await Promise.all([stylePromise, scriptPromise]);
+            destroyThePage();
+            const modalWrapper = document.createElement('div')
+            modalWrapper.innerHTML = templateHTML;
+            unsafeWindow.document.body.appendChild(modalWrapper)
+            MicroModal.init();
+            MicroModal.show('modal-1');
+        }
     };
 
-    if (document.readyState === 'complete') {
-        console.log('document was ready')
-        main();
-    } else {
-        unsafeWindow.addEventListener('load', main)
-        console.log('add on load listener')
-    }
+    main();
 })(typeof unsafeWindow !== "undefined" ? unsafeWindow : window);
